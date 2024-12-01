@@ -11,12 +11,16 @@ const path = d3.geoPath().projection(projection);
 let visitedCountries = new Set();
 const tooltip = d3.select('#tooltip');
 const searchInput = document.getElementById('search');
+const toggleReadOnlyButton = document.getElementById('toggle-readonly');
+let isReadOnly = false;
 
 // Add zoom behavior
 const zoom = d3.zoom()
     .scaleExtent([1, 8])
     .on('zoom', (event) => {
-        svg.selectAll('g').attr('transform', event.transform);
+        if (!isReadOnly) {
+            svg.selectAll('g').attr('transform', event.transform);
+        }
     });
 
 svg.call(zoom);
@@ -58,6 +62,12 @@ function saveStateToServer() {
         .catch(error => console.error('Error saving state:', error));
 }
 
+function toggleReadOnlyMode() {
+    isReadOnly = !isReadOnly;
+    toggleReadOnlyButton.textContent = isReadOnly ? 'Modo Solo Lectura' : 'Modo Editable';
+    toggleReadOnlyButton.className = isReadOnly ? 'readonly' : 'editable';
+}
+
 d3.json('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson').then(data => {
     const countries = data.features.map(d => d.properties.name);
 
@@ -74,52 +84,60 @@ d3.json('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/w
         .attr('d', path)
         .attr('class', 'country not-visited')
         .on('click', function(event, d) {
-            const countryName = d.properties.name;
+            if (!isReadOnly) {
+                const countryName = d.properties.name;
 
-            if (visitedCountries.has(countryName)) {
-                visitedCountries.delete(countryName);
-            } else {
-                visitedCountries.add(countryName);
+                if (visitedCountries.has(countryName)) {
+                    visitedCountries.delete(countryName);
+                } else {
+                    visitedCountries.add(countryName);
+                }
+                updateMap();
             }
-            updateMap();
         })
         .on('mouseover', function(event, d) {
-            tooltip.style('display', 'block')
-                .style('left', (event.pageX + 5) + 'px')
-                .style('top', (event.pageY + 5) + 'px')
-                .text(d.properties.name);
-            d3.select(this).classed('hovered', true);
+            if (!isReadOnly) {
+                tooltip.style('display', 'block')
+                    .style('left', (event.pageX + 5) + 'px')
+                    .style('top', (event.pageY + 5) + 'px')
+                    .text(d.properties.name);
+                d3.select(this).classed('hovered', true);
+            }
         })
         .on('mouseout', function() {
-            tooltip.style('display', 'none');
-            d3.select(this).classed('hovered', false);
+            if (!isReadOnly) {
+                tooltip.style('display', 'none');
+                d3.select(this).classed('hovered', false);
+            }
         });
 
     loadStateFromServer();
 
     searchInput.addEventListener('awesomplete-selectcomplete', (event) => {
-        const countryName = event.text.value;
-        const countryElement = mapGroup.selectAll('path').filter(d => d.properties.name === countryName);
+        if (!isReadOnly) {
+            const countryName = event.text.value;
+            const countryElement = mapGroup.selectAll('path').filter(d => d.properties.name === countryName);
 
-        if (countryElement.node()) {
-            countryElement.classed('hovered', true);
+            if (countryElement.node()) {
+                countryElement.classed('hovered', true);
 
-            const bbox = countryElement.node().getBBox();
-            const scale = Math.min(8, Math.min(width / bbox.width, height / bbox.height));
-            const translate = [
-                width / 2 - scale * (bbox.x + bbox.width / 2),
-                height / 2 - scale * (bbox.y + bbox.height / 2)
-            ];
+                const bbox = countryElement.node().getBBox();
+                const scale = Math.min(8, Math.min(width / bbox.width, height / bbox.height));
+                const translate = [
+                    width / 2 - scale * (bbox.x + bbox.width / 2),
+                    height / 2 - scale * (bbox.y + bbox.height / 2)
+                ];
 
-            svg.transition().duration(750).call(
-                zoom.transform,
-                d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
-            );
+                svg.transition().duration(750).call(
+                    zoom.transform,
+                    d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+                );
+            }
         }
     });
 
     searchInput.addEventListener('input', () => {
-        if (!searchInput.value.trim()) {
+        if (!searchInput.value.trim() && !isReadOnly) {
             resetZoom();
             mapGroup.selectAll('path').classed('hovered', false);
         }
@@ -128,8 +146,11 @@ d3.json('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/w
 
 document.getElementById('save').addEventListener('click', saveStateToServer);
 document.getElementById('refresh').addEventListener('click', () => {
-    loadStateFromServer();
-    alert('Map refreshed!');
+    if (!isReadOnly) {
+        loadStateFromServer();
+        alert('Map refreshed!');
+    }
 });
 
 document.getElementById('reset-zoom').addEventListener('click', resetZoom);
+toggleReadOnlyButton.addEventListener('click', toggleReadOnlyMode);

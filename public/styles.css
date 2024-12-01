@@ -92,3 +92,46 @@ svg {
 .controls button:hover {
     background: #45a049;
 }
+
+button.editable {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+}
+
+button.readonly {
+    background-color: #f44336; /* Rojo */
+    color: white;
+}
+
+/* Awesomplete Styles */
+.awesomplete {
+    position: relative;
+    display: inline-block;
+}
+
+.awesomplete ul {
+    background: rgba(255, 255, 255, 1); /* Full opacity white */
+    color: #000; /* Black text for contrast */
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    position: absolute;
+    z-index: 9999;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.awesomplete li {
+    padding: 10px;
+    cursor: pointer;
+    color: #000; /* Black text */
+}
+
+.awesomplete li:hover,
+.awesomplete li[aria-selected="true"] {
+    background: #4CAF50;
+    color: white;
+}
