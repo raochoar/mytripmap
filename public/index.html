@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Países visitados por Rodrigo y Leo</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.css" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header>
+    <h1>Países visitados por Rodrigo y Leo</h1>
+</header>
+<div class="controls">
+    <input class="autocomplete" id="search" placeholder="Busca un país..." />
+    <button id="save">Guardar Estado</button>
+    <button id="refresh">Refrescar Mapa</button>
+</div>
+<svg id="map" width="960" height="500"></svg>
+<div id="tooltip" class="tooltip" style="display: none;"></div>
+<script src="script.js"></script>
+</body>
+</html>
