@@ -131,3 +131,5 @@ document.getElementById('refresh').addEventListener('click', () => {
     loadStateFromServer();
     alert('Map refreshed!');
 });
+
+document.getElementById('reset-zoom').addEventListener('click', resetZoom);
